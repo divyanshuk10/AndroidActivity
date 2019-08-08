@@ -80,9 +80,8 @@ class MainActivity : BaseActivity() {
         btnCheckInternet = findViewById(R.id.btn_checkInternet)
         btnCheckInternet.setOnClickListener {
             val isConnected = InternetConnectivityUtil.isConnectedOrConnecting()
-           // locationUtil.getLastLocation(this, lastlocationCallbackListenerLast)
-            locationUtil.getLiveLocationUpdates(liveLocationCallbackListener)
-
+            locationUtil.getLastLocation(this, lastlocationCallbackListenerLast)
+            // locationUtil.getLiveLocationUpdates(liveLocationCallbackListener)
             showSnack(isConnected)
         }
 
@@ -90,34 +89,37 @@ class MainActivity : BaseActivity() {
 
     @SuppressLint("SetTextI18n")
     fun initLocationFeeds() {
-        var i:Int = 0
-        /*lastlocationCallbackListenerLast = object : LastLocationCallbackListener {
+        var i: Int = 0
+        lastlocationCallbackListenerLast = object : LastLocationCallbackListener {
             override fun onLocationFound(location: Location?) {
-            i++
+                i++
                 textView.text = "$i : ${location!!.latitude} - ${location.longitude}"
             }
 
             override fun onFailed() {
+                Toast.makeText(BaseApplication.getInstance(), "Location GPS Disabled", Toast.LENGTH_LONG).show()
             }
 
             override fun permissionRequired() {
             }
-        }*/
-         liveLocationCallbackListener = object : LiveLocationCallbackListener {
-             override fun onLocationUpdate(location: Location?) {
-                 i++
-                 textView.text = "$i : ${location!!.latitude} - ${location.longitude}"
-             }
+        }
+/*
+        liveLocationCallbackListener = object : LiveLocationCallbackListener {
+            override fun onLocationUpdate(location: Location?) {
+                i++
+                textView.text = "$i : ${location!!.latitude} - ${location.longitude}"
+            }
 
-             override fun permissionRequired() {
-             }
-         }
+            override fun permissionRequired() {
+            }
+        }
+*/
 
     }
 
     override fun onResume() {
         super.onResume()
-        locationUtil.getLiveLocationUpdates(liveLocationCallbackListener)
+        //    locationUtil.getLiveLocationUpdates(liveLocationCallbackListener)
     }
 
     override fun onPause() {

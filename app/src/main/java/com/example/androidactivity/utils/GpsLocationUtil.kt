@@ -39,7 +39,7 @@ open class GpsLocationUtil {
         mLocationRequest.interval = _interval
         mLocationRequest.fastestInterval = _fastestInterval
         mLocationRequest.priority = LocationRequest.PRIORITY_HIGH_ACCURACY
-        mLocationProviderClient = FusedLocationProviderClient(BaseApplication.getInstance())
+        mLocationProviderClient = LocationServices.getFusedLocationProviderClient(BaseApplication.getInstance())
         mLocationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 super.onLocationResult(locationResult)
@@ -48,7 +48,7 @@ open class GpsLocationUtil {
                 }
             }
         }
-        val builder = LocationSettingsRequest.Builder()
+        val builder = LocationSettingsRequest.Builder().addLocationRequest(mLocationRequest)
         val client: SettingsClient = LocationServices.getSettingsClient(BaseApplication.getInstance())
 
         task = client.checkLocationSettings(builder.build())
@@ -76,6 +76,50 @@ open class GpsLocationUtil {
             return
         }
         if (_activity != null) {
+            /* task.addOnCompleteListener {
+                 OnCompleteListener<LocationSettingsResponse> { task ->
+                     try {
+                         val response = task.getResult(ApiException::class.java)
+                         mLocationProviderClient.lastLocation.addOnSuccessListener {
+                             OnSuccessListener<Location> { location: Location? ->
+                                 if (location != null) {
+                                     if (mLastLocationCallbackListener != null) {
+                                         mLastLocationCallbackListener!!.onLocationFound(location)
+                                     } else {
+                                         mLastLocationCallbackListener!!.onFailed()
+                                     }
+                                 }
+
+                             }
+                         }
+                     } catch (exception: ApiException) {
+                         when (exception.statusCode) {
+                             LocationSettingsStatusCodes.RESOLUTION_REQUIRED ->
+                                 // Location settings are not satisfied. But could be fixed by showing the
+                                 // user a dialog.
+                                 try {
+                                     // Cast to a resolvable exception.
+                                     val resolvable = exception as ResolvableApiException
+                                     // Show the dialog by calling startResolutionForResult(),
+                                     // and check the result in onActivityResult().
+                                     resolvable.startResolutionForResult(
+                                         activity,
+                                         REQUEST_CHECK_SETTINGS
+                                     )
+                                 } catch (e: IntentSender.SendIntentException) {
+                                     // Ignore the error.
+                                 } catch (e: ClassCastException) {
+                                     // Ignore, should be an impossible error.
+                                 }
+
+                             LocationSettingsStatusCodes.SETTINGS_CHANGE_UNAVAILABLE -> {
+                             }
+                         }// Location settings are not satisfied. However, we have no way to fix the
+                         // settings so we won't show the dialog.
+                     }
+                 }
+
+             }*/
             task.addOnSuccessListener {
                 mLocationProviderClient.lastLocation.addOnSuccessListener { location ->
                     if (mCallbackLast != null) {
@@ -91,9 +135,17 @@ open class GpsLocationUtil {
                 if (exception is ResolvableApiException) {
                     // try showing a dialog to enable GPS
                     try {
-                        exception.startResolutionForResult(_activity, REQUEST_CHECK_SETTINGS)
+                        // Cast to a resolvable exception.
+                        // Show the dialog by calling startResolutionForResult(),
+                        // and check the result in onActivityResult().
+                        exception.startResolutionForResult(
+                            activity,
+                            REQUEST_CHECK_SETTINGS
+                        )
                     } catch (sendEx: IntentSender.SendIntentException) {
                         //Ignoring error, and disable functionality
+                    } catch (e: ClassCastException) {
+                        // Ignore, should be an impossible error.
                     }
                 }
             }
